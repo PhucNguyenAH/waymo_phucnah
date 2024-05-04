@@ -142,11 +142,16 @@ class Converter:
         l_mask1 = l_tensor1[..., 0] > 0
         l_mask2 = l_tensor2[..., 0] > 0
 
+        #print(segments[0].values)
         s_tensor1 = segments[0].tensor
         s_tensor2 = segments[1].tensor
-
+        s_tensor1 = tf.cast(s_tensor1, dtype=tf.int32)
+        s_tensor2 = tf.cast(s_tensor2, dtype=tf.int32)
+        
+        
         final_tensor1 = tf.gather_nd(s_tensor1, tf.where(l_mask1))
         final_tensor2 = tf.gather_nd(s_tensor2, tf.where(l_mask2))
+        
         final_labelled_points = tf.concat([final_tensor1, final_tensor2], axis=0)
         final_labelled_points = final_labelled_points.numpy()
 
@@ -157,8 +162,10 @@ class Converter:
         df['pcl'] = df.apply(self.apply_point_clouds, axis=1)
         if subset != 'ts':
             df['labels'] = df.apply(self.apply_labels, axis=1)
+            #display(df['labels'].to_numpy()[0, 0, :])
             return df[['pcl', 'labels']]
         else:
+            
             return df 
         
     
