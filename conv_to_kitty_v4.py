@@ -150,7 +150,6 @@ class Converter:
         
         #assert 1!=1
         final_labelled_points = final_labelled_points.numpy()
-
         return final_labelled_points
 
     def create_point_clouds_and_labels(self, subset, idx):
@@ -166,7 +165,8 @@ class Converter:
         
     
     def process_files(self, output_path="./data_preproc1"):
-        subsets = [ 'tr', 'vl','ts']
+        # subsets = [ 'tr', 'vl','ts']
+        subsets = ['tr']
         # make output directory regardless if it already exists
         os.makedirs(output_path, exist_ok=True)
         # make the training, validation and test sub-directories
@@ -174,20 +174,24 @@ class Converter:
         #os.makedirs(os.path.join(output_path, 'validation'), exist_ok=True)
         os.makedirs(os.path.join(output_path, 'testing'), exist_ok=True)
         # make a labels sub-folder within training and validation to store labels
-        os.makedirs(os.path.join(output_path, 'training', 'labels'), exist_ok=True)
-        os.makedirs(os.path.join(output_path, 'validation', 'labels'), exist_ok=True)
+        # os.makedirs(os.path.join(output_path, 'training', 'labels'), exist_ok=True)
+        os.makedirs(os.path.join(output_path, 'validation'), exist_ok=True)
         
         for subset in subsets:
             if subset == 'tr':
                 num_files = len(self.lidar_tr_pths)
+                files = self.lidar_tr_pths
             elif subset == 'vl':
                 num_files = len(self.lidar_vl_pths)
+                files = self.lidar_vl_pths
             elif subset == 'ts':
                 num_files = len(self.lidar_ts_pths)
+                files = self.lidar_ts_pths
             
-            count = 0
             for idx in tqdm(range(num_files), desc=f'Processing subset: {subset}'):
                 try:
+                    count = 0
+                    segment = files[idx].split("/")[-1].split(".")[0]
                     pcl_and_labels = self.create_point_clouds_and_labels(subset, idx)
                     pcl = pcl_and_labels['pcl']
                     
@@ -199,11 +203,11 @@ class Converter:
                         labels_list = labels.to_numpy().tolist()
                     
                     if subset == 'tr':
-                        save_path = os.path.join(output_path, 'training')
+                        save_path = os.path.join(output_path, 'training', segment)
                     elif subset == 'vl':
-                        save_path = os.path.join(output_path, 'validation')
+                        save_path = os.path.join(output_path, 'validation', segment)
                     elif subset == 'ts':
-                        save_path = os.path.join(output_path, 'testing')
+                        save_path = os.path.join(output_path, 'testing', segment)
                     
                     # Ensure the 'velodyne' directory exists
                     os.makedirs(os.path.join(save_path, 'velodyne'), exist_ok=True)
